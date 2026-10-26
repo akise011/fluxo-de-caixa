@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#15152b">
+<title>Fluxo de Caixa</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="aviso-rede" class="aviso" hidden></div>
+
+<main id="tela-auth" class="auth" hidden>
+  <form id="form-auth" class="cartao auth-cartao" novalidate>
+    <h1>Fluxo de Caixa</h1>
+    <p id="auth-sub" class="suave">Entre para ver as movimentações da sua empresa.</p>
+    <label>E-mail <input type="email" id="auth-email" autocomplete="email" required></label>
+    <label>Senha <input type="password" id="auth-senha" autocomplete="current-password" minlength="6" required></label>
+    <p id="auth-erro" class="erro" role="alert"></p>
+    <button class="btn btn-escuro" id="auth-enviar" type="submit">Entrar</button>
+    <button class="btn-link" id="auth-alternar" type="button">Ainda não tenho conta</button>
+  </form>
+</main>
+
+<div id="tela-app" hidden>
+  <header class="topo">
+    <strong class="marca">Fluxo de Caixa</strong>
+    <nav class="abas" aria-label="Seções">
+      <button data-aba="geral" class="ativa">Visão geral</button>
+      <button data-aba="mov">Movimentações</button>
+      <button data-aba="rel">Relatórios</button>
+    </nav>
+    <div class="topo-dir"><span id="usuario" class="suave"></span><button class="btn btn-claro" id="sair">Sair</button></div>
+  </header>
+
+  <main class="conteudo">
+    <section id="aba-geral">
+      <div class="painel">
+        <div><span class="rotulo">Saldo atual</span><div id="g-saldo" class="grande">R$ 0,00</div></div>
+        <div class="painel-dir"><span id="g-qtd" class="suave-claro"></span></div>
+      </div>
+      <div class="trio">
+        <div class="cartao"><span class="rotulo">Total de receitas</span><div id="g-rec" class="valor pos">R$ 0,00</div></div>
+        <div class="cartao"><span class="rotulo">Total de despesas</span><div id="g-des" class="valor neg">R$ 0,00</div></div>
+        <div class="cartao"><span class="rotulo">Saldo disponível</span><div id="g-sal2" class="valor">R$ 0,00</div></div>
+      </div>
+      <div class="cartao">
+        <h2>Últimas movimentações</h2>
+        <ul id="g-lista" class="lista"></ul>
+      </div>
+    </section>
+
+    <section id="aba-mov" hidden>
+      <form id="form-mov" class="cartao form-mov" novalidate>
+        <h2>Registrar movimentação</h2>
+        <div class="tipo" role="radiogroup" aria-label="Tipo de movimentação">
+          <button type="button" role="radio" aria-checked="true" data-tipo="receita" class="sel-rec">Receita<small>entrada de dinheiro</small></button>
+          <button type="button" role="radio" aria-checked="false" data-tipo="despesa">Despesa<small>saída de dinheiro</small></button>
+        </div>
+        <label>Descrição <input id="m-desc" maxlength="120" placeholder="Ex.: venda balcão, aluguel, conta de luz"></label>
+        <div class="linha3">
+          <label>Valor (R$) <input id="m-valor" inputmode="decimal" placeholder="0,00"></label>
+          <label>Data <input id="m-data" type="date"></label>
+          <label>Categoria <select id="m-cat"></select></label>
+        </div>
+        <label>Observação (opcional) <input id="m-obs" maxlength="200"></label>
+        <p id="m-erro" class="erro" role="alert"></p>
+        <button class="btn btn-verde" id="m-enviar" type="submit">Registrar receita</button>
+      </form>
+    </section>
+
+    <section id="aba-rel" hidden>
+      <div class="cartao filtros">
+        <label>Tipo <select id="f-tipo"><option value="">todos</option><option value="receita">receitas</option><option value="despesa">despesas</option></select></label>
+        <label>Categoria <select id="f-cat"><option value="">todas</option></select></label>
+        <label>De <input type="date" id="f-ini"></label>
+        <label>Até <input type="date" id="f-fim"></label>
+        <label class="f-busca">Buscar <input id="f-q" placeholder="descrição"></label>
+        <button class="btn btn-claro" id="f-limpar" type="button">Limpar</button>
+        <button class="btn btn-escuro" id="f-csv" type="button">Exportar CSV</button>
+      </div>
+      <div class="cartao tabela-wrap">
+        <table>
+          <thead><tr><th>Tipo</th><th>Descrição</th><th class="col-cat">Categoria</th><th>Data</th><th class="num">Valor</th><th><span class="sr">Ações</span></th></tr></thead>
+          <tbody id="r-corpo"></tbody>
+        </table>
+        <p id="r-vazio" class="vazio" hidden>Nenhuma movimentação encontrada. Registre uma na aba Movimentações.</p>
+        <div class="totais"><span>Receitas <b id="r-rec" class="pos"></b></span><span>Despesas <b id="r-des" class="neg"></b></span><span>Saldo do período <b id="r-sal"></b></span></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
