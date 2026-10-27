@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#15152b">
 <title>Fluxo de Caixa</title>
 <link rel="stylesheet" href="style.css">
@@ -14,6 +14,7 @@
   <form id="form-auth" class="cartao auth-cartao" novalidate>
     <h1>Fluxo de Caixa</h1>
     <p id="auth-sub" class="suave">Entre para ver as movimentações da sua empresa.</p>
+    <label id="auth-nome-l" hidden>Nome da empresa <input id="auth-nome" maxlength="60" autocomplete="organization"></label>
     <label>E-mail <input type="email" id="auth-email" autocomplete="email" required></label>
     <label>Senha <input type="password" id="auth-senha" autocomplete="current-password" minlength="6" required></label>
     <p id="auth-erro" class="erro" role="alert"></p>
@@ -22,27 +23,30 @@
   </form>
 </main>
 
-<div id="tela-app" hidden>
-  <header class="topo">
-    <strong class="marca">Fluxo de Caixa</strong>
-    <nav class="abas" aria-label="Seções">
-      <button data-aba="geral" class="ativa">Visão geral</button>
-      <button data-aba="mov">Movimentações</button>
-      <button data-aba="rel">Relatórios</button>
-    </nav>
-    <div class="topo-dir"><span id="usuario" class="suave"></span><button class="btn btn-claro" id="sair">Sair</button></div>
-  </header>
+<div id="tela-app" class="app" hidden>
+  <aside class="lateral">
+    <div class="perfil"><span class="av" aria-hidden="true"></span><div class="perfil-txt"><strong class="nome-emp"></strong><small id="usuario"></small></div></div>
+    <button class="btn btn-verde nova" data-nova type="button">+ Nova movimentação</button>
+    <nav class="nav" data-nav aria-label="Seções"></nav>
+    <div class="lateral-rodape"><span class="status" role="status"></span><button class="btn btn-sair sair" type="button">Sair</button></div>
+  </aside>
+
+  <header class="topo-mov"><span class="av" aria-hidden="true"></span><strong class="nome-emp"></strong><span class="status" role="status"></span><button class="btn btn-claro sair" type="button">Sair</button></header>
 
   <main class="conteudo">
     <section id="aba-geral">
       <div class="painel">
         <div><span class="rotulo">Saldo atual</span><div id="g-saldo" class="grande">R$ 0,00</div></div>
-        <div class="painel-dir"><span id="g-qtd" class="suave-claro"></span></div>
+        <span id="g-qtd" class="suave-claro"></span>
       </div>
       <div class="trio">
         <div class="cartao"><span class="rotulo">Total de receitas</span><div id="g-rec" class="valor pos">R$ 0,00</div></div>
         <div class="cartao"><span class="rotulo">Total de despesas</span><div id="g-des" class="valor neg">R$ 0,00</div></div>
         <div class="cartao"><span class="rotulo">Saldo disponível</span><div id="g-sal2" class="valor">R$ 0,00</div></div>
+      </div>
+      <div class="cartao">
+        <div class="grafico-topo"><h2>Receitas e despesas por mês</h2><span class="legenda"><i class="l-rec"></i>receitas <i class="l-des"></i>despesas</span></div>
+        <div id="g-grafico" class="grafico"></div>
       </div>
       <div class="cartao">
         <h2>Últimas movimentações</h2>
@@ -54,7 +58,7 @@
       <form id="form-mov" class="cartao form-mov" novalidate>
         <h2>Registrar movimentação</h2>
         <div class="tipo" role="radiogroup" aria-label="Tipo de movimentação">
-          <button type="button" role="radio" aria-checked="true" data-tipo="receita" class="sel-rec">Receita<small>entrada de dinheiro</small></button>
+          <button type="button" role="radio" aria-checked="true" data-tipo="receita">Receita<small>entrada de dinheiro</small></button>
           <button type="button" role="radio" aria-checked="false" data-tipo="despesa">Despesa<small>saída de dinheiro</small></button>
         </div>
         <label>Descrição <input id="m-desc" maxlength="120" placeholder="Ex.: venda balcão, aluguel, conta de luz"></label>
@@ -89,6 +93,8 @@
       </div>
     </section>
   </main>
+
+  <nav class="inferior" data-nav aria-label="Seções"></nav>
 </div>
 
 <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
