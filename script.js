@@ -174,7 +174,6 @@ $('#form-mov').addEventListener('submit', async e => {
   toast((tipo === 'receita' ? 'Receita' : 'Despesa') + ' registrada');
 });
 $$('.tipo button').forEach(b => b.addEventListener('click', () => definirTipo(b.dataset.tipo)));
-montarNav();
 ['#f-tipo', '#f-cat', '#f-ini', '#f-fim'].forEach(s => $(s).addEventListener('change', render));
 $('#f-q').addEventListener('input', render);
 $('#f-limpar').addEventListener('click', () => { ['#f-tipo', '#f-cat', '#f-ini', '#f-fim', '#f-q'].forEach(s => $(s).value = ''); render(); });
@@ -312,7 +311,7 @@ function desenharGrafico() {
 // ---------- inicialização ----------
 window.addEventListener('online', sincronizar);
 window.addEventListener('offline', atualizarAviso);
-montarCategorias(); definirTipo('receita'); $('#m-data').value = hoje();
+montarNav(); montarCategorias(); definirTipo('receita'); $('#m-data').value = hoje();
 (async () => {
   let sessao = null;
   try { sessao = (await db.auth.getSession()).data.session; } catch { }
