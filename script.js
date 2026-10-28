@@ -274,7 +274,7 @@ const ROTULOS = { geral: 'Visão geral', mov: 'Movimentações', rel: 'Relatóri
 function montarNav() {
   $$('[data-nav]').forEach(nav => Object.keys(ROTULOS).forEach(k => {
     const b = document.createElement('button'); b.type = 'button'; b.dataset.aba = k;
-    b.innerHTML = '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">' + ICONES[k] + '</svg><span>' + ROTULOS[k] + '</span>';
+    b.innerHTML = '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">' + ICONES[k] + '</svg><span class="rot">' + ROTULOS[k] + '</span>';
     b.addEventListener('click', () => trocarAba(k)); nav.append(b);
   }));
   $$('[data-nova]').forEach(b => b.addEventListener('click', () => { trocarAba('mov'); $('#m-desc').focus(); }));
@@ -308,10 +308,33 @@ function desenharGrafico() {
   alvo.append(svg);
 }
 
+// ---------- tema claro / escuro ----------
+const ICO_TEMA = {
+  claro: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  escuro: '<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>'
+};
+const temaAtual = () => document.documentElement.dataset.tema || (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'escuro' : 'claro');
+function atualizarTema() {
+  const alvo = temaAtual() === 'escuro' ? 'claro' : 'escuro';
+  $$('.tema').forEach(b => {
+    b.innerHTML = '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">' + ICO_TEMA[alvo] + '</svg><span class="rot">Modo ' + alvo + '</span>';
+    b.setAttribute('aria-label', 'Mudar para o modo ' + alvo);
+  });
+}
+function iniciarTema() {
+  $$('.tema').forEach(b => b.addEventListener('click', () => {
+    const novo = temaAtual() === 'escuro' ? 'claro' : 'escuro';
+    document.documentElement.dataset.tema = novo;
+    try { localStorage.setItem('tema', novo); } catch { }
+    atualizarTema();
+  }));
+  atualizarTema();
+}
+
 // ---------- inicialização ----------
 window.addEventListener('online', sincronizar);
 window.addEventListener('offline', atualizarAviso);
-montarNav(); montarCategorias(); definirTipo('receita'); $('#m-data').value = hoje();
+montarNav(); iniciarTema(); montarCategorias(); definirTipo('receita'); $('#m-data').value = hoje();
 (async () => {
   let sessao = null;
   try { sessao = (await db.auth.getSession()).data.session; } catch { }
