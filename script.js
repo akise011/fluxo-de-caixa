@@ -377,7 +377,8 @@ function desenharMetas() {
     i.style.width = Math.min(p.pct, 100) + '%'; barra.append(i);
     const x = mk('button', 'x', 'Excluir'); x.type = 'button'; x.addEventListener('click', () => excluirMeta(m.id));
     c.append(topo); if (m.descricao) c.append(mk('p', 'suave', m.descricao));
-    c.append(barra, mk('small', 'suave', MESES_L[m.mes - 1] + '/' + m.ano + ' · ' + brl(p.atual) + ' de ' + brl(p.alvo) + ' (' + p.pct + '%)'), x); box.append(c);
+    const rod = mk('div', 'meta-rodape'); rod.append(mk('small', 'suave', MESES_L[m.mes - 1] + '/' + m.ano + ' · ' + brl(p.atual) + ' de ' + brl(p.alvo) + ' (' + p.pct + '%)'), x);
+    c.append(barra, rod); box.append(c);
   });
 }
 async function excluirMeta(id) {
@@ -504,11 +505,11 @@ function iniciarExtras() {
     $('#dlg-nota').close(); toast('Anotação salva'); carregarNotas();
   });
 
-  const fecharNotif = () => { $('#notif').hidden = true; $('.lateral').classList.remove('aberta'); $$('.sino').forEach(b => b.setAttribute('aria-expanded', 'false')); };
+  const fecharNotif = () => { $('#notif').hidden = true; $$('.sino').forEach(b => b.setAttribute('aria-expanded', 'false')); };
   $$('.sino').forEach(botao => botao.addEventListener('click', () => {
     const p = $('#notif');
     if (!p.hidden) return fecharNotif();
-    p.hidden = false; $('.lateral').classList.add('aberta'); $$('.sino').forEach(b => b.setAttribute('aria-expanded', 'true'));
+    p.hidden = false; $$('.sino').forEach(b => b.setAttribute('aria-expanded', 'true'));
     const l = gerarNotificacoes(), ja = lidas(); desenharNotif(l, ja);
     gravar('lidas:' + uid, [...new Set([...ja, ...l.map(x => x.id)])]);
     $$('.sino-n').forEach(b => b.hidden = true);

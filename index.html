@@ -31,7 +31,6 @@
 <div id="tela-app" class="app" hidden>
   <aside class="lateral" aria-label="Menu lateral">
     <div class="logo-lat"><img src="favicon.svg" alt="" width="34" height="34"><strong class="rot">Controle+</strong></div>
-    <button class="rod-btn sino" type="button" aria-label="Notificações" aria-expanded="false"><span class="sino-ic"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></svg><span class="sino-n" hidden></span></span><span class="rot">Notificações</span></button>
     <button class="btn btn-verde nova" data-nova type="button" aria-label="Nova movimentação"><span class="mais" aria-hidden="true">+</span><span class="rot">Nova movimentação</span></button>
     <nav class="nav" data-nav aria-label="Seções"></nav>
   </aside>
@@ -159,7 +158,7 @@
   <label>Nome da empresa <input id="ac-nome" maxlength="60" autocomplete="organization"></label>
   <label>Senha atual <input id="ac-senha" type="password" autocomplete="current-password"></label>
   <p id="ac-erro" class="erro" role="alert"></p>
-  <div class="acoes"><button type="button" class="btn btn-claro" data-fechar>Voltar</button><button class="btn btn-verde" type="submit">Salvar</button></div>
+  <div class="acoes"><button class="btn btn-verde" type="submit">Salvar</button><button type="button" class="btn btn-claro" data-fechar>Voltar</button></div>
 </form></dialog>
 
 <div id="notif" class="notif" hidden></div>
