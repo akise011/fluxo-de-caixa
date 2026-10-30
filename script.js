@@ -12,7 +12,7 @@ const CATS = {
 };
 const TODAS = [...CATS.receita, ...CATS.despesa];
 
-let uid = null, email = '', items = [], fila = [], tipo = 'receita', modoCadastro = false;
+let uid = null, email = '', items = [], fila = [], tipo = 'receita', modoCadastro = false, metas = [], notas = [], verArquivadas = false;
 
 // ---------- utilidades ----------
 const centavos = v => Math.round(parseFloat(String(v).replace(',', '.')) * 100);
@@ -75,6 +75,7 @@ async function excluir(id) {
 }
 
 function atualizarAviso() {
+  atualizarNotificacoes();
   $$('.status').forEach(el => { el.textContent = !navigator.onLine ? 'Offline' : fila.length ? 'Sincronizando…' : 'Online'; el.dataset.estado = navigator.onLine ? 'on' : 'off'; });
   const a = $('#aviso-rede');
   if (!navigator.onLine) { a.textContent = 'Sem conexão: você pode continuar usando. As alterações serão enviadas quando a internet voltar.'; a.hidden = false; }
@@ -103,7 +104,7 @@ function botaoExcluir(id) {
 }
 
 function render() {
-  desenharGrafico();
+  desenharGrafico(); atualizarNotificacoes();
   const t = totais(items);
   $('#g-saldo').textContent = $('#g-sal2').textContent = brl(t.saldo);
   $('#g-rec').textContent = brl(t.rec); $('#g-des').textContent = brl(t.des);
@@ -139,7 +140,9 @@ function render() {
 
 function trocarAba(nome) {
   $$('[data-aba]').forEach(b => b.classList.toggle('ativa', b.dataset.aba === nome));
-  ['geral', 'mov', 'rel'].forEach(n => $('#aba-' + n).hidden = n !== nome);
+  ['geral', 'mov', 'rel', 'metas', 'notas'].forEach(n => $('#aba-' + n).hidden = n !== nome);
+  if (nome === 'metas') carregarMetas();
+  if (nome === 'notas') carregarNotas();
 }
 
 function montarCategorias() {
@@ -172,6 +175,7 @@ $('#form-mov').addEventListener('submit', async e => {
   await adicionar({ id: crypto.randomUUID(), tipo, descricao: $('#m-desc').value.trim(), valor: centavos($('#m-valor').value), data: $('#m-data').value, categoria: $('#m-cat').value, observacao: $('#m-obs').value.trim() });
   e.target.reset(); $('#m-data').value = hoje(); definirTipo(tipo);
   toast((tipo === 'receita' ? 'Receita' : 'Despesa') + ' registrada');
+  if ($('#dlg-mov').open) $('#dlg-mov').close();
 });
 $$('.tipo button').forEach(b => b.addEventListener('click', () => definirTipo(b.dataset.tipo)));
 ['#f-tipo', '#f-cat', '#f-ini', '#f-fim'].forEach(s => $(s).addEventListener('change', render));
@@ -237,11 +241,11 @@ $$('.sair').forEach(b => b.addEventListener('click', async () => {
 async function entrar(id, em) {
   uid = id; email = em;
   localStorage.setItem('ultimo_uid', id); localStorage.setItem('ultimo_email', em);
-  items = ler('mov:' + id, []); fila = ler('fila:' + id, []);
+  items = ler('mov:' + id, []); fila = ler('fila:' + id, []); metas = ler('metas:' + id, []); notas = ler('notas:' + id, []);
   pintarPerfil(ler('perfil:' + id, ''), em);
   $('#tela-auth').hidden = true; $('#tela-app').hidden = false;
   render(); atualizarAviso(); trocarAba('geral');
-  carregarPerfil();
+  carregarPerfil(); carregarMetas(); carregarNotas();
   await sincronizar();
 }
 
@@ -269,15 +273,15 @@ async function carregarPerfil() {
   } catch (e) { console.warn('Perfil indisponível:', e.message || e); }
 }
 
-const ICONES = { geral: '<path d="M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3zM13 13h8v8h-8z"/>', mov: '<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>', rel: '<path d="M4 6h16M4 12h16M4 18h10"/>' };
-const ROTULOS = { geral: 'Visão geral', mov: 'Movimentações', rel: 'Relatórios' };
+const ICONES = { geral: '<path d="M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3zM13 13h8v8h-8z"/>', mov: '<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>', rel: '<path d="M4 6h16M4 12h16M4 18h10"/>', metas: '<path d="M4 22V4M4 4h13l-2 4 2 4H4"/>', notas: '<path d="M5 3h10l4 4v14H5zM15 3v4h4M8 12h8M8 16h5"/>' };
+const ROTULOS = { geral: 'Visão geral', mov: 'Movimentações', rel: 'Relatórios', metas: 'Metas', notas: 'Notas' };
 function montarNav() {
   $$('[data-nav]').forEach(nav => Object.keys(ROTULOS).forEach(k => {
     const b = document.createElement('button'); b.type = 'button'; b.dataset.aba = k;
     b.innerHTML = '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">' + ICONES[k] + '</svg><span class="rot">' + ROTULOS[k] + '</span>';
     b.addEventListener('click', () => trocarAba(k)); nav.append(b);
   }));
-  $$('[data-nova]').forEach(b => b.addEventListener('click', () => { trocarAba('mov'); $('#m-desc').focus(); }));
+  $$('[data-nova]').forEach(b => b.addEventListener('click', abrirNovaMov));
 }
 
 const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
@@ -331,10 +335,204 @@ function iniciarTema() {
   atualizarTema();
 }
 
+// ---------- nova movimentação rápida, metas, notas, notificações e alterar acesso ----------
+const mk = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
+const MESES_L = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+const TIPOS_META = {
+  economia: { nome: 'Economia', dica: 'Acompanhe o quanto você poupou (entradas − saídas).' },
+  receita: { nome: 'Receita', dica: 'Acompanhe o total de entradas do mês.' },
+  despesa: { nome: 'Limite de despesas', dica: 'Controle o total de saídas: o limite é o máximo que você quer gastar no mês.' }
+};
+const ICO_ACESSO = '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>';
+const precisaRede = () => { if (navigator.onLine) return false; toast('Sem internet: conecte-se para fazer esta alteração.'); return true; };
+
+// "+ Nova movimentação": abre o mesmo formulário em uma janela, de qualquer tela
+function abrirNovaMov() {
+  if (!$('#aba-mov').hidden) return $('#m-desc').focus();
+  $('#slot-dlg-mov').append($('#form-mov')); $('#dlg-mov').showModal(); $('#m-desc').focus();
+}
+
+// ----- metas -----
+function progressoMeta(m) {
+  const t = totais(items.filter(i => i.data.slice(0, 7) === m.ano + '-' + String(m.mes).padStart(2, '0')));
+  const alvo = Math.round(Number(m.valor) * 100), atual = m.tipo === 'economia' ? t.saldo : m.tipo === 'receita' ? t.rec : t.des;
+  return { atual, alvo, pct: alvo > 0 ? Math.max(0, Math.round(atual / alvo * 100)) : 0 };
+}
+async function carregarMetas() {
+  if (uid && navigator.onLine) {
+    try {
+      const { data, error } = await db.from('metas').select('*').order('ano', { ascending: false }).order('mes', { ascending: false });
+      if (error) throw error; metas = data; gravar('metas:' + uid, metas);
+    } catch (e) { console.warn('Metas indisponíveis:', e.message || e); }
+  }
+  desenharMetas(); atualizarNotificacoes();
+}
+function desenharMetas() {
+  const box = $('#metas-lista'); box.replaceChildren();
+  if (!metas.length) return box.append(mk('div', 'cartao vazio-g', 'Você ainda não definiu metas. Crie a primeira em “Nova meta”.'));
+  metas.forEach(m => {
+    const p = progressoMeta(m), c = mk('div', 'cartao meta'), topo = mk('div', 'meta-topo');
+    topo.append(mk('strong', '', m.titulo), mk('span', 'tag ' + (m.tipo === 'despesa' ? 'despesa' : 'receita'), TIPOS_META[m.tipo].nome));
+    const barra = mk('div', 'barra' + (m.tipo === 'despesa' ? (p.pct > 100 ? ' estouro' : p.pct >= 80 ? ' aviso-b' : '') : '')), i = document.createElement('i');
+    i.style.width = Math.min(p.pct, 100) + '%'; barra.append(i);
+    const x = mk('button', 'x', 'Excluir'); x.type = 'button'; x.addEventListener('click', () => excluirMeta(m.id));
+    c.append(topo); if (m.descricao) c.append(mk('p', 'suave', m.descricao));
+    c.append(barra, mk('small', 'suave', MESES_L[m.mes - 1] + '/' + m.ano + ' · ' + brl(p.atual) + ' de ' + brl(p.alvo) + ' (' + p.pct + '%)'), x); box.append(c);
+  });
+}
+async function excluirMeta(id) {
+  if (precisaRede()) return;
+  const { error } = await db.from('metas').delete().eq('id', id);
+  if (error) return toast('Não foi possível excluir a meta.');
+  toast('Meta excluída'); carregarMetas();
+}
+
+// ----- notas -----
+async function carregarNotas() {
+  if (uid && navigator.onLine) {
+    try {
+      const { data, error } = await db.from('notas').select('*').order('atualizado_em', { ascending: false });
+      if (error) throw error; notas = data; gravar('notas:' + uid, notas);
+    } catch (e) { console.warn('Notas indisponíveis:', e.message || e); }
+  }
+  desenharNotas();
+}
+function desenharNotas() {
+  const box = $('#notas-lista'), q = $('#n-busca').value.trim().toLowerCase(); box.replaceChildren();
+  const lista = notas.filter(n => n.arquivada === verArquivadas && (!q || (n.titulo + ' ' + n.texto).toLowerCase().includes(q)));
+  if (!lista.length) {
+    const v = mk('div', 'vazio-g', verArquivadas ? 'Nenhuma nota arquivada.' : q ? 'Nenhuma nota encontrada.' : 'Você ainda não tem notas.');
+    if (!verArquivadas && !q) { const b = mk('button', 'btn btn-verde', '+ Criar primeira nota'); b.type = 'button'; b.addEventListener('click', () => abrirNota()); v.append(document.createElement('br'), b); }
+    return box.append(v);
+  }
+  const g = mk('div', 'notas');
+  lista.forEach(n => {
+    const c = mk('div', 'nota'), ac = mk('div', 'nota-acoes');
+    const bt = (t, fn) => { const b = mk('button', 'x', t); b.type = 'button'; b.addEventListener('click', fn); return b; };
+    ac.append(bt('Editar', () => abrirNota(n)), bt(n.arquivada ? 'Desarquivar' : 'Arquivar', () => alterarNota(n.id, { arquivada: !n.arquivada })), bt('Excluir', () => excluirNota(n.id)));
+    c.append(mk('strong', '', n.titulo), mk('p', '', n.texto), mk('small', 'suave', 'Atualizada em ' + new Date(n.atualizado_em).toLocaleDateString('pt-BR')), ac); g.append(c);
+  });
+  box.append(g);
+}
+function abrirNota(n) {
+  $('#form-nota').dataset.id = n ? n.id : ''; $('#nota-h').textContent = n ? 'Editar nota' : 'Nova nota';
+  $('#nota-titulo').value = n ? n.titulo : ''; $('#nota-texto').value = n ? n.texto : ''; $('#nota-erro').textContent = '';
+  $('#dlg-nota').showModal(); $('#nota-titulo').focus();
+}
+async function alterarNota(id, campos) {
+  if (precisaRede()) return;
+  const { error } = await db.from('notas').update({ ...campos, atualizado_em: new Date().toISOString() }).eq('id', id);
+  if (error) return toast('Não foi possível alterar a nota.');
+  carregarNotas();
+}
+async function excluirNota(id) {
+  if (precisaRede()) return;
+  const { error } = await db.from('notas').delete().eq('id', id);
+  if (error) return toast('Não foi possível excluir a nota.');
+  toast('Nota excluída'); carregarNotas();
+}
+
+// ----- notificações (geradas a partir do que está acontecendo no sistema) -----
+const lidas = () => ler('lidas:' + uid, []);
+function gerarNotificacoes() {
+  const l = [], t = totais(items);
+  if (fila.length) l.push({ id: 'sync:' + fila.length, txt: fila.length + ' alteração(ões) aguardando envio ao banco de dados.' });
+  if (t.saldo < 0) l.push({ id: 'saldo-neg:' + items.length, txt: 'Atenção: seu saldo está negativo (' + brl(t.saldo) + ').' });
+  metas.forEach(m => {
+    const p = progressoMeta(m);
+    if (m.tipo === 'despesa') {
+      if (p.pct > 100) l.push({ id: 'meta:' + m.id + ':estourou', txt: 'O limite de despesas “' + m.titulo + '” foi ultrapassado (' + p.pct + '%).' });
+      else if (p.pct >= 80) l.push({ id: 'meta:' + m.id + ':80', txt: 'Você já usou ' + p.pct + '% do limite “' + m.titulo + '”.' });
+    } else if (p.pct >= 100) l.push({ id: 'meta:' + m.id + ':ok', txt: 'Meta atingida: “' + m.titulo + '”!' });
+  });
+  return l;
+}
+function desenharNotif(l, ja) {
+  const p = $('#notif'); p.replaceChildren();
+  if (!l.length) return p.append(mk('div', 'notif-item', 'Nenhuma notificação no momento.'));
+  l.forEach(x => p.append(mk('div', 'notif-item' + (ja.includes(x.id) ? '' : ' nova'), x.txt)));
+}
+function atualizarNotificacoes() {
+  if (!uid) return;
+  const l = gerarNotificacoes(), ja = lidas(), n = l.filter(x => !ja.includes(x.id)).length, b = $('#sino-n');
+  b.textContent = n; b.hidden = !n;
+  if (!$('#notif').hidden) desenharNotif(l, ja);
+}
+
+// ----- ligações dos botões e formulários -----
+function iniciarExtras() {
+  $$('[data-acesso]').forEach(b => {
+    b.innerHTML = '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">' + ICO_ACESSO + '</svg><span class="rot">Alterar acesso</span>';
+    b.setAttribute('aria-label', 'Alterar acesso');
+    b.addEventListener('click', () => { $('#ac-nome').value = $('.nome-emp').textContent; $('#ac-senha').value = ''; $('#ac-erro').textContent = ''; $('#dlg-acesso').showModal(); $('#ac-senha').focus(); });
+  });
+  $$('[data-fechar]').forEach(b => b.addEventListener('click', () => b.closest('dialog').close()));
+  $('#dlg-mov').addEventListener('close', () => $('#slot-mov').append($('#form-mov')));
+
+  $('#meta-mes').replaceChildren(...MESES_L.map((n, i) => new Option(n, i + 1)));
+  const dica = () => $('#meta-dica').textContent = TIPOS_META[$('#meta-tipo').value].dica;
+  $('#meta-tipo').addEventListener('change', dica);
+  $('#meta-nova').addEventListener('click', () => {
+    $('#form-meta').reset(); $('#meta-mes').value = new Date().getMonth() + 1; $('#meta-ano').value = new Date().getFullYear();
+    $('#meta-erro').textContent = ''; dica(); $('#dlg-meta').showModal(); $('#meta-titulo').focus();
+  });
+  $('#form-meta').addEventListener('submit', async e => {
+    e.preventDefault();
+    const titulo = $('#meta-titulo').value.trim(), valor = $('#meta-valor').value.trim(), ano = +$('#meta-ano').value, err = $('#meta-erro');
+    if (!titulo) return err.textContent = 'Informe o título.';
+    if (!/^\d+([.,]\d{1,2})?$/.test(valor) || centavos(valor) <= 0) return err.textContent = 'Informe um valor maior que zero, por exemplo 1500,00.';
+    if (!(ano >= 2000 && ano <= 2100)) return err.textContent = 'Informe um ano válido.';
+    if (!navigator.onLine) return err.textContent = 'Sem internet: conecte-se para salvar metas.';
+    const { error } = await db.from('metas').insert({ tipo: $('#meta-tipo').value, titulo, descricao: $('#meta-desc').value.trim() || null, valor: centavos(valor) / 100, mes: +$('#meta-mes').value, ano });
+    if (error) return err.textContent = 'Não foi possível salvar: ' + error.message;
+    $('#dlg-meta').close(); toast('Meta salva'); carregarMetas();
+  });
+
+  $('#nota-nova').addEventListener('click', () => abrirNota());
+  $('#n-busca').addEventListener('input', desenharNotas);
+  $('#n-ativas').addEventListener('click', () => { verArquivadas = false; $('#n-ativas').classList.add('ativa'); $('#n-arq').classList.remove('ativa'); desenharNotas(); });
+  $('#n-arq').addEventListener('click', () => { verArquivadas = true; $('#n-arq').classList.add('ativa'); $('#n-ativas').classList.remove('ativa'); desenharNotas(); });
+  $('#form-nota').addEventListener('submit', async e => {
+    e.preventDefault();
+    const titulo = $('#nota-titulo').value.trim(), texto = $('#nota-texto').value.trim(), id = e.target.dataset.id, err = $('#nota-erro');
+    if (!titulo) return err.textContent = 'Informe o título da nota.';
+    if (!navigator.onLine) return err.textContent = 'Sem internet: conecte-se para salvar notas.';
+    const { error } = id
+      ? await db.from('notas').update({ titulo, texto, atualizado_em: new Date().toISOString() }).eq('id', id)
+      : await db.from('notas').insert({ titulo, texto });
+    if (error) return err.textContent = 'Não foi possível salvar: ' + error.message;
+    $('#dlg-nota').close(); toast('Nota salva'); carregarNotas();
+  });
+
+  $('#sino').addEventListener('click', e => {
+    e.stopPropagation();
+    const p = $('#notif'); p.hidden = !p.hidden; $('#sino').setAttribute('aria-expanded', String(!p.hidden));
+    if (p.hidden) return;
+    const l = gerarNotificacoes(), ja = lidas(); desenharNotif(l, ja);
+    gravar('lidas:' + uid, [...new Set([...ja, ...l.map(x => x.id)])]);
+    const b = $('#sino-n'); b.hidden = true;
+  });
+  document.addEventListener('click', e => { if (!e.target.closest('.sino-wrap')) $('#notif').hidden = true; });
+
+  $('#form-acesso').addEventListener('submit', async e => {
+    e.preventDefault();
+    const nome = $('#ac-nome').value.trim(), senha = $('#ac-senha').value, err = $('#ac-erro');
+    if (!nome) return err.textContent = 'Informe o nome da empresa.';
+    if (!senha) return err.textContent = 'Digite sua senha para confirmar.';
+    if (!navigator.onLine) return err.textContent = 'Sem internet: conecte-se para alterar o acesso.';
+    const { error: e1 } = await db.auth.signInWithPassword({ email, password: senha });
+    if (e1) return err.textContent = 'Senha incorreta.';
+    const { error: e2 } = await db.from('perfis').update({ nome_empresa: nome }).eq('id', uid);
+    if (e2) return err.textContent = 'Não foi possível salvar: ' + e2.message;
+    gravar('perfil:' + uid, nome); pintarPerfil(nome, email);
+    $('#dlg-acesso').close(); toast('Dados de acesso atualizados');
+  });
+}
+
 // ---------- inicialização ----------
 window.addEventListener('online', sincronizar);
 window.addEventListener('offline', atualizarAviso);
-montarNav(); iniciarTema(); montarCategorias(); definirTipo('receita'); $('#m-data').value = hoje();
+montarNav(); iniciarTema(); iniciarExtras(); montarCategorias(); definirTipo('receita'); $('#m-data').value = hoje();
 (async () => {
   let sessao = null;
   try { sessao = (await db.auth.getSession()).data.session; } catch { }

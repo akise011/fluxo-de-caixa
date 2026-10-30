@@ -1,5 +1,5 @@
 // Service Worker: guarda os arquivos do app para abrir sem internet.
-const CACHE = 'fluxo-de-caixa-v3';
+const CACHE = 'fluxo-de-caixa-v4';
 const CDN = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js';
 const ARQUIVOS = ['./', 'index.html', 'style.css', 'script.js', CDN];
 

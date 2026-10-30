@@ -5,11 +5,12 @@
 body{margin:0;background:var(--papel);color:var(--texto);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
 [hidden]{display:none!important}
 h1,h2{margin:0 0 .5rem;line-height:1.2}h2{font-size:1.05rem}
-input,select,button{font:inherit;color:inherit}
-input,select{width:100%;padding:.6rem .7rem;border:1px solid var(--linha);border-radius:8px;background:var(--cartao)}
+input,select,textarea,button{font:inherit;color:inherit}
+input,select,textarea{width:100%;padding:.6rem .7rem;border:1px solid var(--linha);border-radius:8px;background:var(--cartao)}
 :focus-visible{outline:3px solid var(--foco);outline-offset:2px}
 label{display:block;font-size:.85rem;color:var(--suave);margin-bottom:.8rem}
-label input,label select{margin-top:.25rem;color:var(--texto)}
+label input,label select,label textarea{margin-top:.25rem;color:var(--texto)}
+textarea{resize:vertical}
 .suave{color:var(--suave)}.suave-claro{color:#a9a9c8;font-size:.85rem}
 .sr{position:absolute;left:-9999px}
 .pos{color:var(--verde)}.neg{color:var(--verm)}
@@ -98,7 +99,37 @@ th{font-size:.8rem;color:var(--suave);font-weight:600;border-top:0}
 .toast-btn{background:none;border:0;color:#8ec5ff;font-weight:700;cursor:pointer;text-decoration:underline;padding:0}
 
 /* celular: barra lateral vira topo + menu inferior */
+.barra-topo{display:flex;justify-content:flex-end;margin-bottom:.8rem}
+.sino-wrap{position:relative}
+.sino{position:relative;background:var(--cartao);border:1px solid var(--linha);border-radius:8px;padding:.45rem .6rem;cursor:pointer;color:var(--texto);display:flex}
+.sino-n{position:absolute;top:-7px;right:-7px;background:var(--verde);color:var(--on-verde);border-radius:99px;font-size:.7rem;font-weight:700;min-width:18px;padding:0 4px;line-height:18px;text-align:center}
+.notif{position:absolute;right:0;top:calc(100% + .4rem);width:min(340px,86vw);background:var(--cartao);border:1px solid var(--linha);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.25);z-index:15;overflow:hidden}
+.notif-item{padding:.7rem .9rem;border-top:1px solid var(--linha);font-size:.88rem}
+.notif-item:first-child{border-top:0}.notif-item.nova{font-weight:600;background:var(--verde-bg)}
+.cab{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap;margin-bottom:1rem}
+.tit{font-size:1.4rem;margin:0}.cab p{margin:.2rem 0 0}
+.meta-topo{display:flex;justify-content:space-between;align-items:center;gap:.6rem}
+.meta p{margin:.3rem 0}.meta .x{margin-top:.6rem}
+.barra{height:10px;background:var(--linha);border-radius:99px;overflow:hidden;margin:.6rem 0 .3rem}
+.barra i{display:block;height:100%;background:var(--verde)}
+.barra.aviso-b i{background:#f5c542}.barra.estouro i{background:var(--verm)}
+.nota-barra{display:flex;justify-content:space-between;gap:.8rem;flex-wrap:wrap;margin-bottom:1rem}
+.nota-barra input{flex:1;min-width:200px;max-width:380px}
+.seg{display:flex;gap:.3rem}.seg button{background:none;border:1px solid var(--linha);border-radius:8px;padding:.5rem .9rem;cursor:pointer}
+.seg .ativa{background:var(--tinta);color:#fff;border-color:var(--tinta)}
+.notas{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1rem}
+.nota{border:1px solid var(--linha);border-radius:10px;padding:.9rem;background:var(--papel);display:flex;flex-direction:column;gap:.4rem}
+.nota p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;max-height:9rem;overflow:auto}
+.nota-acoes{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.3rem}
+dialog{border:0;border-radius:12px;padding:0;background:var(--cartao);color:var(--texto);width:min(560px,94vw)}
+dialog::backdrop{background:rgba(10,10,25,.6)}
+.dlg-corpo{padding:1.2rem}
+#dlg-mov .form-mov{border:0;margin:0;padding:0}#dlg-mov .btn-claro{margin-top:.6rem}
+.dica{margin:-.5rem 0 .8rem;font-size:.8rem;color:var(--suave)}
+.acoes{display:flex;justify-content:space-between;gap:.6rem}
+.vazio-g{text-align:center;padding:2rem 1rem;color:var(--suave)}.vazio-g .btn{margin-top:.8rem}
 @media (max-width:760px){
+  .inferior button{min-width:0;overflow:hidden}.inferior .rot{font-size:.66rem}
   .app{display:block;padding-right:0}
   .lateral{display:none}
   .topo-mov{display:flex;align-items:center;gap:.6rem;padding:.6rem 1rem;background:var(--tinta);color:#fff;position:sticky;top:0;z-index:5}

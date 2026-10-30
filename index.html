@@ -33,13 +33,18 @@
     <div class="lateral-rodape">
       <span class="status" role="status"></span>
       <button class="rod-btn tema" type="button"></button>
+      <button class="rod-btn" data-acesso type="button"></button>
       <button class="rod-btn sair" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg><span class="rot">Sair</span></button>
     </div>
   </aside>
 
-  <header class="topo-mov"><span class="av" aria-hidden="true"></span><strong class="nome-emp"></strong><span class="status" role="status"></span><button class="btn btn-claro tema" type="button"></button><button class="btn btn-claro sair" type="button">Sair</button></header>
+  <header class="topo-mov"><span class="av" aria-hidden="true"></span><strong class="nome-emp"></strong><span class="status" role="status"></span><button class="btn btn-claro tema" type="button"></button><button class="btn btn-claro" data-acesso type="button"></button><button class="btn btn-claro sair" type="button">Sair</button></header>
 
   <main class="conteudo">
+    <div class="barra-topo"><div class="sino-wrap">
+      <button class="sino" id="sino" type="button" aria-label="Notificações" aria-expanded="false"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></svg><span id="sino-n" class="sino-n" hidden></span></button>
+      <div id="notif" class="notif" hidden></div>
+    </div></div>
     <section id="aba-geral">
       <div class="painel">
         <div><span class="rotulo">Saldo atual</span><div id="g-saldo" class="grande">R$ 0,00</div></div>
@@ -60,7 +65,7 @@
       </div>
     </section>
 
-    <section id="aba-mov" hidden>
+    <section id="aba-mov" hidden><div id="slot-mov">
       <form id="form-mov" class="cartao form-mov" novalidate>
         <h2>Registrar movimentação</h2>
         <div class="tipo" role="radiogroup" aria-label="Tipo de movimentação">
@@ -76,7 +81,20 @@
         <label>Observação (opcional) <input id="m-obs" maxlength="200"></label>
         <p id="m-erro" class="erro" role="alert"></p>
         <button class="btn btn-verde" id="m-enviar" type="submit">Registrar receita</button>
-      </form>
+      </form></div>
+    </section>
+
+    <section id="aba-metas" hidden>
+      <div class="cab"><div><h2 class="tit">Metas financeiras</h2><p class="suave">Defina um objetivo para acompanhar sua receita, controlar suas despesas ou medir sua economia.</p></div><button class="btn btn-verde" id="meta-nova" type="button">+ Nova meta</button></div>
+      <div id="metas-lista"></div>
+    </section>
+
+    <section id="aba-notas" hidden>
+      <div class="cab"><div><h2 class="tit">Bloco de notas</h2><p class="suave">Anote lembretes e combinados com a equipe, o que precisar, sem sair do sistema.</p></div><button class="btn btn-verde" id="nota-nova" type="button">+ Nova nota</button></div>
+      <div class="cartao">
+        <div class="nota-barra"><input id="n-busca" type="search" placeholder="Buscar no título ou no texto da nota"><div class="seg"><button type="button" id="n-ativas" class="ativa">Ativas</button><button type="button" id="n-arq">Arquivadas</button></div></div>
+        <div id="notas-lista"></div>
+      </div>
     </section>
 
     <section id="aba-rel" hidden>
@@ -102,6 +120,35 @@
 
   <nav class="inferior" data-nav aria-label="Seções"></nav>
 </div>
+
+<dialog id="dlg-mov"><div class="dlg-corpo"><div id="slot-dlg-mov"></div><button type="button" class="btn btn-claro" data-fechar>Cancelar</button></div></dialog>
+
+<dialog id="dlg-meta"><form id="form-meta" class="dlg-corpo" novalidate>
+  <h2>Nova meta financeira</h2><p class="suave">Defina um objetivo para acompanhar sua receita, controlar suas despesas ou medir sua economia.</p>
+  <label>Tipo de meta <select id="meta-tipo"><option value="economia">Meta de economia (entradas − saídas)</option><option value="receita">Meta de receita (total de entradas)</option><option value="despesa">Limite de despesas (total de saídas)</option></select></label>
+  <p id="meta-dica" class="dica"></p>
+  <label>Título <input id="meta-titulo" maxlength="80" placeholder="Ex: Economizar para viagem, Controlar gastos com alimentação"></label>
+  <label>Descrição (opcional) <textarea id="meta-desc" rows="2" maxlength="300"></textarea></label>
+  <div class="linha3"><label>Valor da meta (R$) <input id="meta-valor" inputmode="decimal" placeholder="0,00"></label><label>Mês <select id="meta-mes"></select></label><label>Ano <input id="meta-ano" type="number" min="2000" max="2100"></label></div>
+  <p id="meta-erro" class="erro" role="alert"></p>
+  <div class="acoes"><button type="button" class="btn btn-claro" data-fechar>Voltar</button><button class="btn btn-verde" type="submit">Salvar meta</button></div>
+</form></dialog>
+
+<dialog id="dlg-nota"><form id="form-nota" class="dlg-corpo" novalidate>
+  <h2 id="nota-h">Nova nota</h2>
+  <label>Título <input id="nota-titulo" maxlength="80"></label>
+  <label>Texto <textarea id="nota-texto" rows="6" maxlength="2000"></textarea></label>
+  <p id="nota-erro" class="erro" role="alert"></p>
+  <div class="acoes"><button type="button" class="btn btn-claro" data-fechar>Voltar</button><button class="btn btn-verde" type="submit">Salvar nota</button></div>
+</form></dialog>
+
+<dialog id="dlg-acesso"><form id="form-acesso" class="dlg-corpo" novalidate>
+  <h2>Alterar acesso</h2><p class="suave">Para alterar o nome da empresa, confirme sua senha.</p>
+  <label>Nome da empresa <input id="ac-nome" maxlength="60" autocomplete="organization"></label>
+  <label>Senha atual <input id="ac-senha" type="password" autocomplete="current-password"></label>
+  <p id="ac-erro" class="erro" role="alert"></p>
+  <div class="acoes"><button type="button" class="btn btn-claro" data-fechar>Voltar</button><button class="btn btn-verde" type="submit">Salvar</button></div>
+</form></dialog>
 
 <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
