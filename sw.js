@@ -1,5 +1,5 @@
 // Service Worker: guarda os arquivos do app para abrir sem internet.
-const CACHE = 'controle-mais-v9';
+const CACHE = 'controle-mais-v10';
 const CDN = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js';
 const ARQUIVOS = ['./', 'index.html', 'style.css', 'script.js', 'favicon.svg', 'icone-192.png', CDN];
 
