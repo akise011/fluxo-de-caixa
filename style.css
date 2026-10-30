@@ -11,7 +11,7 @@ input,select,textarea{width:100%;padding:.6rem .7rem;border:1px solid var(--linh
 label{display:block;font-size:.85rem;color:var(--suave);margin-bottom:.8rem}
 label input,label select,label textarea{margin-top:.25rem;color:var(--texto)}
 textarea{resize:vertical}
-.suave{color:var(--suave)}.suave-claro{color:#a9a9c8;font-size:.85rem}
+.suave{color:var(--suave)}.suave-claro{color:var(--suave);font-size:.85rem}
 .sr{position:absolute;left:-9999px}
 .pos{color:var(--verde)}.neg{color:var(--verm)}
 .erro{color:var(--verm);min-height:1.2em;margin:.2rem 0 .6rem;font-size:.9rem}
@@ -79,8 +79,8 @@ textarea{resize:vertical}
 .conteudo{max-width:980px;width:100%;margin:0 auto;padding:.6rem 1.4rem 1.4rem}
 
 /* visão geral */
-.painel{background:var(--tinta);color:#fff;border-radius:12px;padding:1.2rem 1.4rem;margin-bottom:1rem;display:flex;justify-content:space-between;align-items:flex-end;gap:1rem}
-.rotulo{font-size:.8rem;color:var(--suave)}.painel .rotulo{color:#a9a9c8}
+.painel{background:var(--cartao);color:var(--texto);border:1px solid var(--linha);border-radius:12px;padding:1.2rem 1.4rem;margin-bottom:1rem;display:flex;justify-content:space-between;align-items:flex-end;gap:1rem}
+.rotulo{font-size:.8rem;color:var(--suave)}
 .grande{font-size:2rem;font-weight:700}
 .trio{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1rem}
 .trio .cartao{margin:0}.valor{font-size:1.4rem;font-weight:700}
