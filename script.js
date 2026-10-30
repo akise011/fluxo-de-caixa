@@ -531,10 +531,20 @@ function iniciarExtras() {
   });
 }
 
+// ---------- menu da conta (avatar no canto superior direito) ----------
+function iniciarMenuPerfil() {
+  const menu = $('#menu-perfil'), btn = $('#av-btn');
+  const fechar = () => { menu.hidden = true; btn.setAttribute('aria-expanded', 'false'); };
+  btn.addEventListener('click', () => { const abrir = menu.hidden; fechar(); if (abrir) { menu.hidden = false; btn.setAttribute('aria-expanded', 'true'); } });
+  menu.addEventListener('click', e => { if (e.target.closest('button')) fechar(); });
+  document.addEventListener('click', e => { if (!e.target.closest('#menu-perfil') && !e.target.closest('#av-btn')) fechar(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') fechar(); });
+}
+
 // ---------- inicialização ----------
 window.addEventListener('online', sincronizar);
 window.addEventListener('offline', atualizarAviso);
-for (const f of [montarNav, iniciarTema, iniciarExtras]) { try { f(); } catch (e) { console.error('Falha ao iniciar', f.name, e); } }
+for (const f of [montarNav, iniciarTema, iniciarExtras, iniciarMenuPerfil]) { try { f(); } catch (e) { console.error('Falha ao iniciar', f.name, e); } }
 montarCategorias(); definirTipo('receita'); $('#m-data').value = hoje();
 (async () => {
   let sessao = null;

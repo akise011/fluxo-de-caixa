@@ -31,22 +31,29 @@
 <div id="tela-app" class="app" hidden>
   <aside class="lateral" aria-label="Menu lateral">
     <div class="logo-lat"><img src="favicon.svg" alt="" width="34" height="34"><strong class="rot">Controle+</strong></div>
-    <div class="perfil"><span class="av" aria-hidden="true"></span><div class="perfil-txt"><strong class="nome-emp"></strong><small id="usuario"></small></div></div>
     <button class="rod-btn sino" type="button" aria-label="Notificações" aria-expanded="false"><span class="sino-ic"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></svg><span class="sino-n" hidden></span></span><span class="rot">Notificações</span></button>
     <button class="btn btn-verde nova" data-nova type="button" aria-label="Nova movimentação"><span class="mais" aria-hidden="true">+</span><span class="rot">Nova movimentação</span></button>
     <nav class="nav" data-nav aria-label="Seções"></nav>
-    <div class="lateral-rodape">
-      <span class="status" role="status"></span>
-      <button class="rod-btn tema" type="button"></button>
-      <button class="rod-btn" data-acesso type="button"></button>
-      <button class="rod-btn sair" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg><span class="rot">Sair</span></button>
-    </div>
   </aside>
 
-  <header class="topo-mov"><span class="av" aria-hidden="true"></span><strong class="nome-emp"></strong><span class="status" role="status"></span><button class="btn btn-claro sino" type="button" aria-label="Notificações" aria-expanded="false"><span class="sino-ic"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></svg><span class="sino-n" hidden></span></span></button><button class="btn btn-claro tema" type="button"></button><button class="btn btn-claro" data-acesso type="button"></button><button class="btn btn-claro sair" type="button">Sair</button></header>
+  <header class="topo">
+    <div class="topo-logo"><img src="favicon.svg" alt="" width="30" height="30"><strong>Controle+</strong></div>
+    <button class="btn btn-claro sino sino-topo" type="button" aria-label="Notificações" aria-expanded="false"><span class="sino-ic"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></svg><span class="sino-n" hidden></span></span></button>
+    <div class="perfil-wrap">
+      <button class="av av-btn" id="av-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-label="Menu da conta"></button>
+      <div id="menu-perfil" class="menu-perfil" hidden>
+        <div class="menu-cab"><span class="av" aria-hidden="true"></span><div class="menu-txt"><strong class="nome-emp"></strong><small id="usuario"></small></div></div>
+        <div class="menu-status"><span class="status" role="status"></span></div>
+        <button class="item-menu" data-acesso type="button"></button>
+        <button class="item-menu tema" type="button"></button>
+        <button class="item-menu sair" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg><span class="rot">Sair</span></button>
+      </div>
+    </div>
+  </header>
 
   <main class="conteudo">
     <section id="aba-geral">
+      <div class="pag-cab"><h1>Visão geral<span class="info-wrap"><button class="info" type="button" aria-label="Sobre esta página">i</button><span class="info-txt" role="tooltip">Resumo do seu caixa: saldo atual, totais de receitas e despesas, gráfico dos últimos 6 meses e as últimas movimentações registradas.</span></span></h1></div>
       <div class="painel">
         <div><span class="rotulo">Saldo atual</span><div id="g-saldo" class="grande">R$ 0,00</div></div>
         <span id="g-qtd" class="suave-claro"></span>
@@ -66,7 +73,8 @@
       </div>
     </section>
 
-    <section id="aba-mov" hidden><div id="slot-mov">
+    <section id="aba-mov" hidden>
+      <div class="pag-cab"><h1>Movimentações<span class="info-wrap"><button class="info" type="button" aria-label="Sobre esta página">i</button><span class="info-txt" role="tooltip">Registre aqui cada entrada (receita) ou saída (despesa) de dinheiro. O saldo é atualizado na hora.</span></span></h1></div><div id="slot-mov">
       <form id="form-mov" class="cartao form-mov" novalidate>
         <h2>Registrar movimentação</h2>
         <div class="tipo" role="radiogroup" aria-label="Tipo de movimentação">
@@ -86,12 +94,14 @@
     </section>
 
     <section id="aba-metas" hidden>
-      <div class="cab"><div><h2 class="tit">Metas financeiras</h2><p class="suave">Defina um objetivo para acompanhar sua receita, controlar suas despesas ou medir sua economia.</p></div><button class="btn btn-verde" id="meta-nova" type="button">+ Nova meta</button></div>
+      <div class="pag-cab"><h1>Metas financeiras<span class="info-wrap"><button class="info" type="button" aria-label="Sobre esta página">i</button><span class="info-txt" role="tooltip">Defina objetivos para o mês: economizar, atingir uma receita ou limitar as despesas. A barra mostra o quanto você já alcançou.</span></span></h1></div>
+      <div class="pag-acoes"><button class="btn btn-verde" id="meta-nova" type="button">+ Nova meta</button></div>
       <div id="metas-lista"></div>
     </section>
 
     <section id="aba-notas" hidden>
-      <div class="cab"><div><h2 class="tit">Anotações</h2><p class="suave">Anote lembretes e combinados com a equipe, o que precisar, sem sair do sistema.</p></div><button class="btn btn-verde" id="nota-nova" type="button">+ Nova anotação</button></div>
+      <div class="pag-cab"><h1>Anotações<span class="info-wrap"><button class="info" type="button" aria-label="Sobre esta página">i</button><span class="info-txt" role="tooltip">Seu bloco de notas dentro do sistema: lembretes e combinados com a equipe. Arquive o que já foi resolvido.</span></span></h1></div>
+      <div class="pag-acoes"><button class="btn btn-verde" id="nota-nova" type="button">+ Nova anotação</button></div>
       <div class="cartao">
         <div class="nota-barra"><input id="n-busca" type="search" placeholder="Buscar no título ou no texto da anotação"><div class="seg"><button type="button" id="n-ativas" class="ativa">Ativas</button><button type="button" id="n-arq">Arquivadas</button></div></div>
         <div id="notas-lista"></div>
@@ -99,6 +109,7 @@
     </section>
 
     <section id="aba-rel" hidden>
+      <div class="pag-cab"><h1>Relatórios<span class="info-wrap"><button class="info" type="button" aria-label="Sobre esta página">i</button><span class="info-txt" role="tooltip">Veja todas as movimentações, filtre por tipo, categoria, período ou texto e exporte o resultado em CSV para abrir no Excel.</span></span></h1></div>
       <div class="cartao filtros">
         <label>Tipo <select id="f-tipo"><option value="">todos</option><option value="receita">receitas</option><option value="despesa">despesas</option></select></label>
         <label>Categoria <select id="f-cat"><option value="">todas</option></select></label>
