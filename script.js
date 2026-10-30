@@ -121,7 +121,7 @@ function render() {
     d.append(s1, s2);
     const v = document.createElement('b'); v.className = m.tipo === 'receita' ? 'pos' : 'neg';
     v.textContent = (m.tipo === 'receita' ? '+ ' : '− ') + brl(m.valor);
-    li.append(tag, d, v, botaoExcluir(m.id)); ul.append(li);
+    li.append(tag, d, v); ul.append(li);
   });
 
   const lista = filtrados(), corpo = $('#r-corpo'); corpo.replaceChildren();
