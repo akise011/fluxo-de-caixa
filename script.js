@@ -274,7 +274,7 @@ async function carregarPerfil() {
 }
 
 const ICONES = { geral: '<path d="M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3zM13 13h8v8h-8z"/>', mov: '<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>', rel: '<path d="M4 6h16M4 12h16M4 18h10"/>', metas: '<path d="M4 22V4M4 4h13l-2 4 2 4H4"/>', notas: '<path d="M5 3h10l4 4v14H5zM15 3v4h4M8 12h8M8 16h5"/>' };
-const ROTULOS = { geral: 'Visão geral', mov: 'Movimentações', rel: 'Relatórios', metas: 'Metas', notas: 'Notas' };
+const ROTULOS = { geral: 'Visão geral', mov: 'Movimentações', rel: 'Relatórios', metas: 'Metas', notas: 'Anotações' };
 function montarNav() {
   $$('[data-nav]').forEach(nav => Object.keys(ROTULOS).forEach(k => {
     const b = document.createElement('button'); b.type = 'button'; b.dataset.aba = k;
@@ -401,8 +401,8 @@ function desenharNotas() {
   const box = $('#notas-lista'), q = $('#n-busca').value.trim().toLowerCase(); box.replaceChildren();
   const lista = notas.filter(n => n.arquivada === verArquivadas && (!q || (n.titulo + ' ' + n.texto).toLowerCase().includes(q)));
   if (!lista.length) {
-    const v = mk('div', 'vazio-g', verArquivadas ? 'Nenhuma nota arquivada.' : q ? 'Nenhuma nota encontrada.' : 'Você ainda não tem notas.');
-    if (!verArquivadas && !q) { const b = mk('button', 'btn btn-verde', '+ Criar primeira nota'); b.type = 'button'; b.addEventListener('click', () => abrirNota()); v.append(document.createElement('br'), b); }
+    const v = mk('div', 'vazio-g', verArquivadas ? 'Nenhuma anotação arquivada.' : q ? 'Nenhuma anotação encontrada.' : 'Você ainda não tem anotações.');
+    if (!verArquivadas && !q) { const b = mk('button', 'btn btn-verde', '+ Criar primeira anotação'); b.type = 'button'; b.addEventListener('click', () => abrirNota()); v.append(document.createElement('br'), b); }
     return box.append(v);
   }
   const g = mk('div', 'notas');
@@ -415,21 +415,21 @@ function desenharNotas() {
   box.append(g);
 }
 function abrirNota(n) {
-  $('#form-nota').dataset.id = n ? n.id : ''; $('#nota-h').textContent = n ? 'Editar nota' : 'Nova nota';
+  $('#form-nota').dataset.id = n ? n.id : ''; $('#nota-h').textContent = n ? 'Editar anotação' : 'Nova anotação';
   $('#nota-titulo').value = n ? n.titulo : ''; $('#nota-texto').value = n ? n.texto : ''; $('#nota-erro').textContent = '';
   $('#dlg-nota').showModal(); $('#nota-titulo').focus();
 }
 async function alterarNota(id, campos) {
   if (precisaRede()) return;
   const { error } = await db.from('notas').update({ ...campos, atualizado_em: new Date().toISOString() }).eq('id', id);
-  if (error) return toast('Não foi possível alterar a nota.');
+  if (error) return toast('Não foi possível alterar a anotação.');
   carregarNotas();
 }
 async function excluirNota(id) {
   if (precisaRede()) return;
   const { error } = await db.from('notas').delete().eq('id', id);
-  if (error) return toast('Não foi possível excluir a nota.');
-  toast('Nota excluída'); carregarNotas();
+  if (error) return toast('Não foi possível excluir a anotação.');
+  toast('Anotação excluída'); carregarNotas();
 }
 
 // ----- notificações (geradas a partir do que está acontecendo no sistema) -----
@@ -454,8 +454,8 @@ function desenharNotif(l, ja) {
 }
 function atualizarNotificacoes() {
   if (!uid) return;
-  const l = gerarNotificacoes(), ja = lidas(), n = l.filter(x => !ja.includes(x.id)).length, b = $('#sino-n');
-  b.textContent = n; b.hidden = !n;
+  const l = gerarNotificacoes(), ja = lidas(), n = l.filter(x => !ja.includes(x.id)).length;
+  $$('.sino-n').forEach(b => { b.textContent = n; b.hidden = !n; });
   if (!$('#notif').hidden) desenharNotif(l, ja);
 }
 
@@ -495,24 +495,26 @@ function iniciarExtras() {
   $('#form-nota').addEventListener('submit', async e => {
     e.preventDefault();
     const titulo = $('#nota-titulo').value.trim(), texto = $('#nota-texto').value.trim(), id = e.target.dataset.id, err = $('#nota-erro');
-    if (!titulo) return err.textContent = 'Informe o título da nota.';
-    if (!navigator.onLine) return err.textContent = 'Sem internet: conecte-se para salvar notas.';
+    if (!titulo) return err.textContent = 'Informe o título da anotação.';
+    if (!navigator.onLine) return err.textContent = 'Sem internet: conecte-se para salvar anotações.';
     const { error } = id
       ? await db.from('notas').update({ titulo, texto, atualizado_em: new Date().toISOString() }).eq('id', id)
       : await db.from('notas').insert({ titulo, texto });
     if (error) return err.textContent = 'Não foi possível salvar: ' + error.message;
-    $('#dlg-nota').close(); toast('Nota salva'); carregarNotas();
+    $('#dlg-nota').close(); toast('Anotação salva'); carregarNotas();
   });
 
-  $('#sino').addEventListener('click', e => {
-    e.stopPropagation();
-    const p = $('#notif'); p.hidden = !p.hidden; $('#sino').setAttribute('aria-expanded', String(!p.hidden));
-    if (p.hidden) return;
+  const fecharNotif = () => { $('#notif').hidden = true; $('.lateral').classList.remove('aberta'); $$('.sino').forEach(b => b.setAttribute('aria-expanded', 'false')); };
+  $$('.sino').forEach(botao => botao.addEventListener('click', () => {
+    const p = $('#notif');
+    if (!p.hidden) return fecharNotif();
+    p.hidden = false; $('.lateral').classList.add('aberta'); $$('.sino').forEach(b => b.setAttribute('aria-expanded', 'true'));
     const l = gerarNotificacoes(), ja = lidas(); desenharNotif(l, ja);
     gravar('lidas:' + uid, [...new Set([...ja, ...l.map(x => x.id)])]);
-    const b = $('#sino-n'); b.hidden = true;
-  });
-  document.addEventListener('click', e => { if (!e.target.closest('.sino-wrap')) $('#notif').hidden = true; });
+    $$('.sino-n').forEach(b => b.hidden = true);
+  }));
+  document.addEventListener('click', e => { if (!e.target.closest('.sino') && !e.target.closest('#notif')) fecharNotif(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') fecharNotif(); });
 
   $('#form-acesso').addEventListener('submit', async e => {
     e.preventDefault();
@@ -532,7 +534,8 @@ function iniciarExtras() {
 // ---------- inicialização ----------
 window.addEventListener('online', sincronizar);
 window.addEventListener('offline', atualizarAviso);
-montarNav(); iniciarTema(); iniciarExtras(); montarCategorias(); definirTipo('receita'); $('#m-data').value = hoje();
+for (const f of [montarNav, iniciarTema, iniciarExtras]) { try { f(); } catch (e) { console.error('Falha ao iniciar', f.name, e); } }
+montarCategorias(); definirTipo('receita'); $('#m-data').value = hoje();
 (async () => {
   let sessao = null;
   try { sessao = (await db.auth.getSession()).data.session; } catch { }
