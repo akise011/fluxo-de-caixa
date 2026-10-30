@@ -1,7 +1,7 @@
 // Service Worker: guarda os arquivos do app para abrir sem internet.
-const CACHE = 'controle-mais-v12';
+const CACHE = 'controle-mais-v13';
 const CDN = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js';
-const ARQUIVOS = ['./', 'index.html', 'style.css', 'script.js', 'favicon.svg', 'icone-192.png', CDN];
+const ARQUIVOS = ['./', 'index.html', 'style.css?v=12', 'script.js?v=12', 'favicon.svg', 'icone-192.png', CDN];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ARQUIVOS)).then(() => self.skipWaiting()));
