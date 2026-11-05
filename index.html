@@ -9,7 +9,7 @@
 <link rel="icon" href="icone-192.png" type="image/png" sizes="192x192">
 <link rel="apple-touch-icon" href="icone-192.png">
 <script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.dataset.tema=t}catch(e){}</script>
-<link rel="stylesheet" href="style.css?v=12">
+<link rel="stylesheet" href="style.css?v=13">
 </head>
 <body>
 <div id="aviso-rede" class="aviso" hidden></div>
@@ -134,6 +134,7 @@
 
 <dialog id="dlg-mov"><div class="dlg-corpo"><div id="slot-dlg-mov"></div><button type="button" class="btn btn-claro" data-fechar>Cancelar</button></div></dialog>
 
+<dialog id="dlg-excluir" aria-labelledby="dlg-excluir-t"><div class="dlg-corpo"><h2 id="dlg-excluir-t">Excluir movimentação?</h2><p id="dlg-excluir-txt"></p><div class="dlg-acoes"><button type="button" class="btn btn-claro" data-fechar>Cancelar</button><button type="button" class="btn btn-perigo" id="btn-confirma-excluir">Excluir</button></div></div></dialog>
 <dialog id="dlg-meta"><form id="form-meta" class="dlg-corpo" novalidate>
   <h2>Nova meta financeira</h2><p class="suave">Defina um objetivo para acompanhar sua receita, controlar suas despesas ou medir sua economia.</p>
   <label>Tipo de meta <select id="meta-tipo"><option value="economia">Meta de economia (entradas − saídas)</option><option value="receita">Meta de receita (total de entradas)</option><option value="despesa">Limite de despesas (total de saídas)</option></select></label>
@@ -164,6 +165,6 @@
 <div id="notif" class="notif" hidden></div>
 <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="script.js?v=12"></script>
+<script src="script.js?v=13"></script>
 </body>
 </html>

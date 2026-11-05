@@ -96,10 +96,18 @@ function filtrados() {
   return items.filter(m => (!t || m.tipo === t) && (!c || m.categoria === c) && (!i || m.data >= i) && (!f || m.data <= f) && (!q || m.descricao.toLowerCase().includes(q)));
 }
 
+function confirmarExclusao(id) {
+  const m = items.find(x => x.id === id); if (!m) return;
+  const dlg = $('#dlg-excluir');
+  $('#dlg-excluir-txt').textContent = '“' + m.descricao + '” (' + brl(m.valor) + ') será removida. Você poderá desfazer logo após a exclusão.';
+  $('#btn-confirma-excluir').onclick = () => { dlg.close(); excluir(id); };
+  dlg.showModal();
+}
+
 function botaoExcluir(id) {
   const b = document.createElement('button');
   b.className = 'x'; b.textContent = 'Excluir'; b.setAttribute('aria-label', 'Excluir movimentação');
-  b.addEventListener('click', () => excluir(id));
+  b.addEventListener('click', () => confirmarExclusao(id));
   return b;
 }
 
@@ -114,7 +122,7 @@ function render() {
   if (!items.length) { const li = document.createElement('li'); li.className = 'suave'; li.textContent = 'Nenhuma movimentação ainda. Registre a primeira na aba Movimentações.'; ul.append(li); }
   items.slice(0, 5).forEach(m => {
     const li = document.createElement('li');
-    const tag = document.createElement('span'); tag.className = 'tag ' + m.tipo; tag.textContent = m.tipo;
+    const tag = document.createElement('span'); tag.className = 'tag ' + m.tipo; tag.textContent = (m.tipo === 'receita' ? '▲ ' : '▼ ') + m.tipo;
     const d = document.createElement('div'); d.className = 'desc';
     const s1 = document.createElement('span'); s1.textContent = m.descricao;
     const s2 = document.createElement('small'); s2.textContent = dataBR(m.data);

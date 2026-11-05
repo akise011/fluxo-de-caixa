@@ -145,7 +145,7 @@ th{font-size:.8rem;color:var(--suave);font-weight:600;border-top:0}
 .nota-acoes{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.3rem}
 dialog{border:0;border-radius:12px;padding:0;background:var(--cartao);color:var(--texto);width:min(560px,94vw)}
 dialog::backdrop{background:rgba(10,10,25,.6)}
-.dlg-corpo{padding:1.2rem}
+.dlg-corpo{padding:1.2rem}.dlg-acoes{display:flex;gap:.6rem;justify-content:flex-end;margin-top:1rem}.btn-perigo{background:var(--verm);border:1px solid var(--verm);color:#fff}
 #dlg-mov .form-mov{border:0;margin:0;padding:0}#dlg-mov .btn-claro{display:block;margin:.6rem 0 0 auto}
 .dica{margin:-.5rem 0 .8rem;font-size:.8rem;color:var(--suave)}
 .acoes{display:flex;justify-content:space-between;gap:.6rem}
